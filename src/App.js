@@ -13,17 +13,17 @@ class BooksApp extends React.Component {
 
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
-      console.log(books)
       this.setState({ books })
     })
   }
 
   updateShelf(shelf, book) {
-    BooksAPI.update(book, shelf).then(book => {
-      console.log(book)
-      // this.setState(state => ({
-      //   state.books.book.shelf = shelf
-      // }))
+    BooksAPI.update(book, shelf).then(booksObject => {
+      const allBooks = this.state.books;
+      const mybook = allBooks.filter((b) => b.id === book.id);
+      mybook[0].shelf = shelf;
+
+      this.setState({ books: allBooks });
     })
   }
 
@@ -38,19 +38,19 @@ class BooksApp extends React.Component {
             <div className="list-books-content">
               <div>
                 <Bookshelf
-                  onUpdateShelf={this.updateShelf}
+                  onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Currently Reading'}
                   books={this.state.books}
                   shelf={'currentlyReading'}
                 />
                 <Bookshelf
-                  onUpdateShelf={this.updateShelf}
+                  onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Want to Read'}
                   books={this.state.books}
                   shelf={'wantToRead'}
                 />
                 <Bookshelf
-                  onUpdateShelf={this.updateShelf}
+                  onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Read'}
                   books={this.state.books}
                   shelf={'read'}
