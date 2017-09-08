@@ -1,27 +1,79 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import sortBy from 'sort-by'
+import * as BooksAPI from './BooksAPI.js'
+import Book from './Book-component.js'
 
 class Search extends Component {
+  state = {
+    query: '',
+    books: []
+  }
+
+  updateQuery = (query) => {
+    if(query){
+      BooksAPI.search(query.trim(), 20).then(result => {
+        console.log(result)
+        if(!result.error){
+        //   result.map(book => {
+        //     book.shelf = 'none'
+        //     return result
+        // })
+          result.map(book => this.updateRequestedBook(book))
+        } else {
+          result = []
+        }
+        this.setState({ books: result })
+
+      })
+    } else {
+      this.setState({books: []})
+    }
+    this.setState({query: query})
+  }
+
+  updateRequestedBook = (book) => {
+    const myBook = this.props.books.find(myBook => (myBook.id === book.id))
+    if(myBook){
+      book.shelf = myBook.shelf
+    } else {
+      book.shelf = 'none'
+    }
+    return book
+  }
+
+  updateShelf = (value, book) => {
+    if(this.props.onUpdateShelf){
+      this.props.onUpdateShelf(value, book)
+      console.log(history)
+    }
+  }
+
 	render() {
+    const { books, query } = this.state
+    const displayBooks = books.sort(sortBy('title')).filter(book => book.imageLinks)
+
 		return (
 			<div className="search-books">
         <div className="search-books-bar">
           <Link className="close-search" to="/">Close</Link>
           <div className="search-books-input-wrapper">
-            {/*
-              NOTES: The search from BooksAPI is limited to a particular set of search terms.
-              You can find these search terms here:
-              https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-              However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-              you don't find a specific author or title. Every search is limited by search terms.
-            */}
-            <input type="text" placeholder="Search by title or author"/>
-
+            <input
+              type="text"
+              placeholder="Search by title or author"
+              onChange={(event) => {this.updateQuery(event.target.value)}}
+              value={query}/>
           </div>
         </div>
         <div className="search-books-results">
-          <ol className="books-grid"></ol>
+          {displayBooks.length === 0 && query.length >= 1 && (
+            <div className="search-no-results">
+              <p>No results found for <strong>{query}</strong></p>
+            </div>
+          )}
+          <Book
+            books={displayBooks}
+            onUpdate={this.updateShelf.bind(this)}/>
         </div>
       </div>
 		)

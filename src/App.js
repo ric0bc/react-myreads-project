@@ -7,8 +7,7 @@ import Search from './search-component.js'
 
 class BooksApp extends React.Component {
   state = {
-    books: [],
-    showSearchPage: false
+    books: []
   }
 
   componentDidMount() {
@@ -19,17 +18,32 @@ class BooksApp extends React.Component {
 
   updateShelf(shelf, book) {
     BooksAPI.update(book, shelf).then(booksObject => {
-      const allBooks = this.state.books;
-      const mybook = allBooks.filter((b) => b.id === book.id);
-      mybook[0].shelf = shelf;
+      const allMyBooks = this.state.books
+      const mybook = allMyBooks.filter((b) => b.id === book.id)
+      if(mybook.length === 0){
+        book.shelf = shelf
+        allMyBooks.push(book)
+      } else {
+        mybook[0].shelf = shelf
+      }
 
-      this.setState({ books: allBooks });
+      this.setState({ books: allMyBooks })
     })
   }
 
   render() {
+    const { books } = this.state
+
     return (
       <div className="app">
+          <Route path="/search" render={({ history }) => (
+            <Search
+              books={books}
+              onUpdateShelf={(shelf, book) => {
+                this.updateShelf(shelf, book)
+                history.push('/')
+              }}/>
+          )} />
         <Route exact path="/" render={() => (
           <div className="list-books">
             <div className="list-books-title">
@@ -40,19 +54,19 @@ class BooksApp extends React.Component {
                 <Bookshelf
                   onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Currently Reading'}
-                  books={this.state.books}
+                  books={books}
                   shelf={'currentlyReading'}
                 />
                 <Bookshelf
                   onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Want to Read'}
-                  books={this.state.books}
+                  books={books}
                   shelf={'wantToRead'}
                 />
                 <Bookshelf
                   onUpdateShelf={(shelf, book) => this.updateShelf(shelf, book)}
                   title={'Read'}
-                  books={this.state.books}
+                  books={books}
                   shelf={'read'}
                 />
               </div>
@@ -62,7 +76,6 @@ class BooksApp extends React.Component {
             </div>
           </div>
         )} />
-        <Route path="/search" component={Search} />
       </div>
     )
   }
