@@ -13,12 +13,7 @@ class Search extends Component {
   updateQuery = (query) => {
     if(query){
       BooksAPI.search(query.trim(), 20).then(result => {
-        console.log(result)
         if(!result.error){
-        //   result.map(book => {
-        //     book.shelf = 'none'
-        //     return result
-        // })
           result.map(book => this.updateRequestedBook(book))
         } else {
           result = []
@@ -45,7 +40,6 @@ class Search extends Component {
   updateShelf = (value, book) => {
     if(this.props.onUpdateShelf){
       this.props.onUpdateShelf(value, book)
-      console.log(history)
     }
   }
 
