@@ -18,8 +18,7 @@ class BooksApp extends React.Component {
 
   updateShelf(shelf, book) {
     BooksAPI.update(book, shelf).then(booksObject => {
-      // TODO: allMyBooks should be a copy not a Ref.
-      const allMyBooks = this.state.books
+      const allMyBooks = [...this.state.books]
       const mybook = allMyBooks.filter((b) => b.id === book.id)
       if(mybook.length === 0){
         book.shelf = shelf
